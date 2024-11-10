@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <chrono>
+#include <deque>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ public:
   {
     for (const auto& [vertex, _] : m_graph)
     {
-      if (!m_visited[vertex] && is_cycle(vertex, -1))
+      if (!is_visited_vertex(vertex) && is_cycle_iterative(vertex, -1))
       {
         return true;
       }
@@ -53,13 +54,34 @@ private:
     }
   }
 
+  bool is_visited_vertex(int vertex) const
+  {
+    if (vertex < 0 && vertex >= m_visited.size())
+    {
+      std::cerr << "get vertex is out of range: " << vertex << std::endl;
+      return false;
+    }
+    return m_visited[vertex];
+  }
+
+  void set_visited_vertex(int vertex, bool flag)
+  {
+    if (vertex < 0 && vertex >= m_visited.size())
+    {
+      std::cerr << "set vertex is out of range: " << vertex << std::endl;
+      return;
+    }
+
+    m_visited[vertex] = flag;
+  }
+
   bool is_cycle(int vertex, int parent_vertex)
   {
-    m_visited[vertex] = true;
+    set_visited_vertex(vertex, true);
 
     for (int adj_vertex : m_graph.at(vertex))
     {
-      if (!m_visited[adj_vertex])
+      if (!is_visited_vertex(adj_vertex))
       {
         if (is_cycle(adj_vertex, vertex))
         {
@@ -69,6 +91,34 @@ private:
       else if (adj_vertex != parent_vertex)
       {
         return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool is_cycle_iterative(int vertex, int parent_vertex)
+  {
+    std::deque<int> vertexs;
+    vertexs.push_front(vertex);
+    while (!vertexs.empty())
+    {
+      int current_vertex = vertexs.front();
+      vertexs.pop_front();
+
+      if (is_visited_vertex(current_vertex))
+      {
+        return true;
+      }
+
+      set_visited_vertex(current_vertex, true);
+      for (int adj_vertex : m_graph.at(current_vertex))
+      {
+        // Add adj vertexs of current vertex to front
+        if (!is_visited_vertex(adj_vertex))
+        {
+          vertexs.push_front(adj_vertex);
+        }
       }
     }
 
@@ -106,9 +156,11 @@ int main(int argc, const char *argv[]) {
 
   const vector<Edge> edges_with_cycle    = { {0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {4, 8}, {4, 9}, {3, 6}, {3, 7}, {6, 10}, {6, 11}, {5, 9} };
   const vector<Edge> edges_without_cycle = { {0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {4, 8}, {4, 9}, {3, 6}, {3, 7}, {6, 10}, {6, 11} };
+  //const vector<Edge> edges = { {0, 1}, {1, 2}, {2, 3}, {2, 5}, {1, 4}, {5, 3} };
 
   check_for_cycles(edges_with_cycle);
   check_for_cycles(edges_without_cycle);
+  //check_for_cycles(edges);
 
   return 0;
 }
