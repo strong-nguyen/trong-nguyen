@@ -77,7 +77,7 @@ private:
     return false;
   }
 
-  std::vector<bool> m_visited;
+  std::vector<bool> m_visited;  // Mark visited vertex, assume that vertex is indexed start at 0 and end at size() - 1
   std::unordered_map<int, std::unordered_set<int>> m_graph;  // Map vertex -> its adjacent vertexs
 };
 
