@@ -33,12 +33,18 @@ public:
 
   bool solve()
   {
-    for (const auto& [vertex, _] : m_graph)
+    for (const auto& [node, _] : m_graph)
     {
-      if (!is_visited_vertex(vertex) && is_cycle_iterative(vertex, -1))
+      if (!is_visited_node(node) && is_cycle_iterative(node))
       {
         return true;
       }
+
+      // Or use recursive way
+      //if (!is_visited_node(node) && is_cycle(node, -1))
+      //{
+      //  return true;
+      //}
     }
 
     return false;
@@ -54,41 +60,42 @@ private:
     }
   }
 
-  bool is_visited_vertex(int vertex) const
+  bool is_visited_node(int node) const
   {
-    if (vertex < 0 && vertex >= m_visited.size())
+    if (node < 0 && node >= m_visited.size())
     {
-      std::cerr << "get vertex is out of range: " << vertex << std::endl;
+      std::cerr << "is_visited_node is out of range: " << node << std::endl;
       return false;
     }
-    return m_visited[vertex];
+
+    return m_visited[node];
   }
 
-  void set_visited_vertex(int vertex, bool flag)
+  void set_visited_node(int node, bool flag)
   {
-    if (vertex < 0 && vertex >= m_visited.size())
+    if (node < 0 && node >= m_visited.size())
     {
-      std::cerr << "set vertex is out of range: " << vertex << std::endl;
+      std::cerr << "set_visited_node is out of range: " << node << std::endl;
       return;
     }
 
-    m_visited[vertex] = flag;
+    m_visited[node] = flag;
   }
 
-  bool is_cycle(int vertex, int parent_vertex)
+  bool is_cycle(int node, int parent_node)
   {
-    set_visited_vertex(vertex, true);
+    set_visited_node(node, true);
 
-    for (int adj_vertex : m_graph.at(vertex))
+    for (int adj_node : m_graph.at(node))
     {
-      if (!is_visited_vertex(adj_vertex))
+      if (!is_visited_node(adj_node))
       {
-        if (is_cycle(adj_vertex, vertex))
+        if (is_cycle(adj_node, node))
         {
           return true;
         }
       }
-      else if (adj_vertex != parent_vertex)
+      else if (adj_node != parent_node)
       {
         return true;
       }
@@ -97,27 +104,27 @@ private:
     return false;
   }
 
-  bool is_cycle_iterative(int vertex, int parent_vertex)
+  bool is_cycle_iterative(int node)
   {
-    std::deque<int> vertexs;
-    vertexs.push_front(vertex);
-    while (!vertexs.empty())
+    std::deque<int> nodes;
+    nodes.push_front(node);
+    while (!nodes.empty())
     {
-      int current_vertex = vertexs.front();
-      vertexs.pop_front();
+      int current_node = nodes.front();
+      nodes.pop_front();
 
-      if (is_visited_vertex(current_vertex))
+      if (is_visited_node(current_node))
       {
         return true;
       }
 
-      set_visited_vertex(current_vertex, true);
-      for (int adj_vertex : m_graph.at(current_vertex))
+      set_visited_node(current_node, true);
+      for (int adj_node : m_graph.at(current_node))
       {
-        // Add adj vertexs of current vertex to front
-        if (!is_visited_vertex(adj_vertex))
+        // Add adj nodes of current node to front
+        if (!is_visited_node(adj_node))
         {
-          vertexs.push_front(adj_vertex);
+          nodes.push_front(adj_node);
         }
       }
     }
@@ -125,8 +132,8 @@ private:
     return false;
   }
 
-  std::vector<bool> m_visited;  // Mark visited vertex, assume that vertex is indexed start at 0 and end at size() - 1
-  std::unordered_map<int, std::unordered_set<int>> m_graph;  // Map vertex -> its adjacent vertexs
+  std::vector<bool> m_visited;  // Mark visited node, assume that node is indexed start at 0 and end at size() - 1
+  std::unordered_map<int, std::unordered_set<int>> m_graph;  // Map node -> its adjacent nodes
 };
 
 
@@ -156,11 +163,9 @@ int main(int argc, const char *argv[]) {
 
   const vector<Edge> edges_with_cycle    = { {0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {4, 8}, {4, 9}, {3, 6}, {3, 7}, {6, 10}, {6, 11}, {5, 9} };
   const vector<Edge> edges_without_cycle = { {0, 1}, {0, 2}, {0, 3}, {1, 4}, {1, 5}, {4, 8}, {4, 9}, {3, 6}, {3, 7}, {6, 10}, {6, 11} };
-  //const vector<Edge> edges = { {0, 1}, {1, 2}, {2, 3}, {2, 5}, {1, 4}, {5, 3} };
 
   check_for_cycles(edges_with_cycle);
   check_for_cycles(edges_without_cycle);
-  //check_for_cycles(edges);
 
   return 0;
 }
